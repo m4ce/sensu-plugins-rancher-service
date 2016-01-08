@@ -97,26 +97,31 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
     services.each do |service|
       source = "#{service['stack_name']}_#{service['name']}.rancher.internal"
 
+      if service['metadata'].has_key?('sensu') and service['metadata']['sensu'].has_key?('monitored')
+        monitored = service['metadata']['sensu']['monitored']
+      else
+        monitored = true
+      end
+
       # get containers
       service['containers'].each do |container_name|
         check_name = "rancher-container-#{container_name}-health_state"
-        msg = "Container #{container_name}"
+        msg = "Instance #{container_name}"
 
-        health_state = get_container(container_name)['health_state']
-        case health_state
-          when 'healthy'
-            send_ok(check_name, source, "#{msg} is healthy")
+        unless monitored
+          send_ok(check_name, source, "#{msg} not monitored (disabled)")
+        else
+          health_state = get_container(container_name)['health_state']
+          case health_state
+            when 'healthy'
+              send_ok(check_name, source, "#{msg} is healthy")
 
-          when nil
-            send_ok(check_name, source, "#{msg} not monitored")
+            when nil
+              send_warning(check_name, source, "#{msg} not monitored")
 
-          else
-            msg += " is not healthy"
-            if config[:warn]
-              send_warning(check_name, source, msg)
             else
-              send_critical(check_name, source, msg)
-            end
+              send_critical(check_name, source, "#{msg} is not healthy")
+          end
         end
       end
     end
