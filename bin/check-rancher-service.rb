@@ -16,13 +16,6 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
          :proc => proc { |s| s.gsub(/\/$/, '') },
          :default => "http://rancher-metadata/2015-07-25"
 
-  option :warn,
-         :description => "Warn instead of throwing a critical failure",
-         :short => "-w",
-         :long => "--warn",
-         :boolean => true,
-         :default => false
-
   option :dryrun,
          :description => "Do not send events to sensu client socket",
          :long => "--dryrun",
@@ -96,6 +89,9 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
   end
 
   def run
+    unmonitored = 0
+    unhealthy = 0
+
     get_services().each do |service|
       source = "#{service['stack_name']}_#{service['name']}.rancher.internal"
 
@@ -120,12 +116,18 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
 
             when nil
               send_warning(check_name, source, "#{msg} not monitored")
+              unmonitored += 1
 
             else
               send_critical(check_name, source, "#{msg} is not healthy")
+              unhealthy += 1
           end
         end
       end
     end
+
+    critical("Found #{unhealthy} unhealthy instances") if unhealthy > 0
+    warning("Found #{unmonitored} instances not begin monitored") if unmonitored > 0
+    ok("All Rancher services instances are healthy")
   end
 end
