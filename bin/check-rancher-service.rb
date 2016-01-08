@@ -67,6 +67,8 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
       return true
     else
       return false
+    end
+  end
 
   def api_get(query)
     begin
