@@ -5,6 +5,10 @@ This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachang
 
 ## Unreleased
 
+## [0.0.4] - 2016-01-08
+### Added
+- Fixed services loop
+
 ## [0.0.3] - 2016-01-08
 ### Added
 - Fixed typo
