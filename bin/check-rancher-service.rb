@@ -62,7 +62,7 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
     send_client_socket(event.to_json)
   end
 
-  def is_error?(data):
+  def is_error?(data)
     if data.is_a?(Hash) and data.has_key?('code') and data['code'] == 404
       return true
     else
