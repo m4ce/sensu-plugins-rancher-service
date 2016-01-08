@@ -96,7 +96,7 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
   end
 
   def run
-    services.each do |service|
+    get_services().each do |service|
       source = "#{service['stack_name']}_#{service['name']}.rancher.internal"
 
       if service['metadata'].has_key?('sensu') and service['metadata']['sensu'].has_key?('monitored')
