@@ -16,6 +16,12 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
          :proc => proc { |s| s.gsub(/\/$/, '') },
          :default => "http://rancher-metadata/2015-07-25"
 
+  option :handlers,
+         :description => "Comma separated list of handlers",
+         :long => "--handlers <HANDLER>",
+         :proc => proc { |s| s.split(',') },
+         :default => []
+
   option :dryrun,
          :description => "Do not send events to sensu client socket",
          :long => "--dryrun",
@@ -36,22 +42,22 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
   end
 
   def send_ok(check_name, source, msg)
-    event = {"name" => check_name, "source" => source, "status" => 0, "output" => "OK: #{msg}"}
+    event = {"name" => check_name, "source" => source, "status" => 0, "output" => "#{self.class.name} OK: #{msg}", "handlers" => config[:handlers]}
     send_client_socket(event.to_json)
   end
 
   def send_warning(check_name, source, msg)
-    event = {"name" => check_name, "source" => source, "status" => 1, "output" => "WARNING: #{msg}"}
+    event = {"name" => check_name, "source" => source, "status" => 1, "output" => "#{self.class.name} WARNING: #{msg}", "handlers" => config[:handlers]}
     send_client_socket(event.to_json)
   end
 
   def send_critical(check_name, source, msg)
-    event = {"name" => check_name, "source" => source, "status" => 2, "output" => "CRITICAL: #{msg}"}
+    event = {"name" => check_name, "source" => source, "status" => 2, "output" => "#{self.class.name} CRITICAL: #{msg}", "handlers" => config[:handlers]}
     send_client_socket(event.to_json)
   end
 
   def send_unknown(check_name, source, msg)
-    event = {"name" => check_name, "source" => source, "status" => 3, "output" => "UNKNOWN: #{msg}"}
+    event = {"name" => check_name, "source" => source, "status" => 3, "output" => "#{self.class.name} UNKNOWN: #{msg}", "handlers" => config[:handlers]}
     send_client_socket(event.to_json)
   end
 
