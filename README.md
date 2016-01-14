@@ -25,8 +25,11 @@ The plugin accepts the following command line options:
 Usage: check-rancher-service.rb (options)
         --api-url <URL>              Rancher Metadata API URL (default: http://rancher-metadata/2015-07-25)
         --dryrun                     Do not send events to sensu client socket
+        --handlers <HANDLERS>        Comma separated list of handlers
     -w, --warn                       Warn instead of throwing a critical failure
 ```
+
+Use the --handlers command line option to specify which handlers you want to use for the generated events.
 
 ## Deployment
 
