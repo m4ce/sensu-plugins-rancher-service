@@ -36,22 +36,22 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
   end
 
   def send_ok(check_name, source, msg)
-    event = {"name" => check_name, "source" => source, "status" => 0, "output" => "OK: #{msg}", "handler" => config[:handler]}
+    event = {"name" => check_name, "source" => source, "status" => 0, "output" => "OK: #{msg}"}
     send_client_socket(event.to_json)
   end
 
   def send_warning(check_name, source, msg)
-    event = {"name" => check_name, "source" => source, "status" => 1, "output" => "WARNING: #{msg}", "handler" => config[:handler]}
+    event = {"name" => check_name, "source" => source, "status" => 1, "output" => "WARNING: #{msg}"}
     send_client_socket(event.to_json)
   end
 
   def send_critical(check_name, source, msg)
-    event = {"name" => check_name, "source" => source, "status" => 2, "output" => "CRITICAL: #{msg}", "handler" => config[:handler]}
+    event = {"name" => check_name, "source" => source, "status" => 2, "output" => "CRITICAL: #{msg}"}
     send_client_socket(event.to_json)
   end
 
   def send_unknown(check_name, source, msg)
-    event = {"name" => check_name, "source" => source, "status" => 3, "output" => "UNKNOWN: #{msg}", "handler" => config[:handler]}
+    event = {"name" => check_name, "source" => source, "status" => 3, "output" => "UNKNOWN: #{msg}"}
     send_client_socket(event.to_json)
   end
 
