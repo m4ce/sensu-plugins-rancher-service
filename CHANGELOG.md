@@ -5,6 +5,10 @@ This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachang
 
 ## Unreleased
 
+## [0.0.6] - 2016-01-08
+### Added
+- Removed unused config[:handler]
+
 ## [0.0.5] - 2016-01-08
 ### Added
 - Provide final main status
