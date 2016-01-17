@@ -5,6 +5,10 @@ This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachang
 
 ## Unreleased
 
+## [0.0.10] - 2016-01-17
+### Added
+- Requiring fileutils.
+
 ## [0.0.9] - 2016-01-17
 ### Added
 - Fixed typo
