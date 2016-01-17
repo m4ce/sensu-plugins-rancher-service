@@ -145,7 +145,7 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
           skip = false
           if state.has_key?(container_name)
             if container['start_count'] > state[container_name]['start_count']
-              send_warning(check_name, source, "#{msg} has restarted"
+              send_warning(check_name, source, "#{msg} has restarted")
               skip = true
             end
           else
