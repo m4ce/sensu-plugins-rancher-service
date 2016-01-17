@@ -5,6 +5,11 @@ This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachang
 
 ## Unreleased
 
+## [0.0.8] - 2016-01-17
+### Added
+- Detecting when a service instance restarts
+- Adding check on service state
+
 ## [0.0.7] - 2016-01-14
 ### Added
 - Added --handlers command line option
