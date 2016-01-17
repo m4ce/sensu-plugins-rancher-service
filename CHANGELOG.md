@@ -5,6 +5,10 @@ This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachang
 
 ## Unreleased
 
+## [0.0.12] - 2016-01-17
+### Added
+- Fixed typo
+
 ## [0.0.11] - 2016-01-17
 ### Added
 - state should be persisted in json format
