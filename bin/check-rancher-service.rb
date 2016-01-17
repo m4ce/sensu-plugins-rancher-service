@@ -16,6 +16,11 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
          :proc => proc { |s| s.gsub(/\/$/, '') },
          :default => "http://rancher-metadata/2015-07-25"
 
+  option :state_dir,
+         :description => "State directory",
+         :long => "--state-dir <PATH> (default: /var/cache/check-rancher-service)",
+         :default => "/var/cache/check-rancher-service"
+
   option :handlers,
          :description => "Comma separated list of handlers",
          :long => "--handlers <HANDLER>",
@@ -30,6 +35,23 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
 
   def initialize()
     super
+
+    # prepare state directory
+    FileUtils.mkdir_p(config[:state_dir]) unless File.directory?(config[:state_dir])
+
+    @state_file = config[:state_dir] + "/containers.json"
+  end
+
+  def read_state()
+    if File.exists?(@state_file)
+      JSON.parse(File.read(@state_file))
+    else
+      {}
+    end
+  end
+
+  def write_state(state)
+    File.open(@state_file, 'w') { |f| f.write(state) }
   end
 
   def send_client_socket(data)
@@ -98,6 +120,9 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
     unmonitored = 0
     unhealthy = 0
 
+    # read current state
+    state = read_state()
+
     get_services().each do |service|
       source = "#{service['stack_name']}_#{service['name']}.rancher.internal"
 
@@ -109,14 +134,31 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
 
       # get containers
       service['containers'].each do |container_name|
-        check_name = "rancher-container-#{container_name}-health_state"
+        check_name = "rancher-container-#{container_name}-state"
         msg = "Instance #{container_name}"
 
         unless monitored
           send_ok(check_name, source, "#{msg} not monitored (disabled)")
         else
-          health_state = get_container(container_name)['health_state']
-          case health_state
+          container = get_container(container_name)
+
+          skip = false
+          if state.has_key?(container_name)
+            if container['start_count'] > state[container_name]['start_count']
+              send_warning(check_name, source, "#{msg} has restarted"
+              skip = true
+            end
+          else
+            state[container_name] = {}
+          end
+
+          # update state
+          state[container_name]['start_count'] = container['start_count']
+
+          next if skip
+
+          # check if the service restarted
+          case container['health_state']
             when 'healthy'
               send_ok(check_name, source, "#{msg} is healthy")
 
@@ -130,6 +172,17 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
           end
         end
       end
+    end
+
+    # persist state to disk
+    write_state(state)
+
+    # check service scale size to determine whether it's degraded or not
+    check_name = "rancher-service-state"
+    if service['containers'].size < service['scale']
+      send_warning(check_name, source, "Service is in a degraded state - Current: #{service['containers'].size} (Scale: #{service['scale']})")
+    else
+      send_ok(check_name, source, "Service is healthy")
     end
 
     critical("Found #{unhealthy} unhealthy instances") if unhealthy > 0
