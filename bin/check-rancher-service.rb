@@ -8,7 +8,7 @@
 require 'sensu-plugin/check/cli'
 require 'net/http'
 require 'json'
-require' fileutils'
+require 'fileutils'
 
 class CheckRancherService < Sensu::Plugin::Check::CLI
   option :api_url,
