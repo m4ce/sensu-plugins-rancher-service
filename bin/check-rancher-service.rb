@@ -173,18 +173,18 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
           end
         end
       end
+
+      # check service scale size to determine whether it's degraded or not
+      check_name = "rancher-service-state"
+      if service['containers'].size < service['scale']
+        send_warning(check_name, source, "Service is in a degraded state - Current: #{service['containers'].size} (Scale: #{service['scale']})")
+      else
+        send_ok(check_name, source, "Service is healthy")
+      end
     end
 
     # persist state to disk
     write_state(state)
-
-    # check service scale size to determine whether it's degraded or not
-    check_name = "rancher-service-state"
-    if service['containers'].size < service['scale']
-      send_warning(check_name, source, "Service is in a degraded state - Current: #{service['containers'].size} (Scale: #{service['scale']})")
-    else
-      send_ok(check_name, source, "Service is healthy")
-    end
 
     critical("Found #{unhealthy} unhealthy instances") if unhealthy > 0
     warning("Found #{unmonitored} instances not begin monitored") if unmonitored > 0
