@@ -5,6 +5,10 @@ This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachang
 
 ## Unreleased
 
+## [0.0.9] - 2016-01-17
+### Added
+- Fixed typo
+
 ## [0.0.8] - 2016-01-17
 ### Added
 - Detecting when a service instance restarts
