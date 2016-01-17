@@ -52,7 +52,7 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
   end
 
   def write_state(state)
-    File.open(@state_file, 'w') { |f| f.write(JSON.dump(state)) }
+    File.open(@state_file, 'w') { |f| f.write(state.to_json) }
   end
 
   def send_client_socket(data)
