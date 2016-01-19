@@ -2,7 +2,7 @@ module SensuPluginsRancherService
   module Version
     MAJOR = 0
     MINOR = 0
-    PATCH = 13
+    PATCH = 14
 
     VER_STRING = [MAJOR, MINOR, PATCH].compact.join('.')
   end
