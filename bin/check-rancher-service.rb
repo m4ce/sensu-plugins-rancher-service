@@ -143,33 +143,37 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
         else
           container = get_container(container_name)
 
-          skip = false
-          if state.has_key?(container_name)
-            if container['start_count'] > state[container_name]['start_count']
-              send_warning(check_name, source, "#{msg} has restarted")
-              skip = true
-            end
+          if container['labels'].has_key?('io.rancher.container.start_once') and container['labels']['io.rancher.container.start_once']
+            send_ok(check_name, source, "#{msg} not monitored (start-once)"
           else
-            state[container_name] = {}
-          end
-
-          # update state
-          state[container_name]['start_count'] = container['start_count']
-
-          next if skip
-
-          # check if the service restarted
-          case container['health_state']
-            when 'healthy'
-              send_ok(check_name, source, "#{msg} is healthy")
-
-            when nil
-              send_warning(check_name, source, "#{msg} not monitored")
-              unmonitored += 1
-
+            skip = false
+            if state.has_key?(container_name)
+              if container['start_count'] > state[container_name]['start_count']
+                send_warning(check_name, source, "#{msg} has restarted")
+                skip = true
+              end
             else
-              send_critical(check_name, source, "#{msg} is not healthy")
-              unhealthy += 1
+              state[container_name] = {}
+            end
+
+            # update state
+            state[container_name]['start_count'] = container['start_count']
+
+            next if skip
+
+            # check if the service restarted
+            case container['health_state']
+              when 'healthy'
+                send_ok(check_name, source, "#{msg} is healthy")
+
+              when nil
+                send_warning(check_name, source, "#{msg} not monitored")
+                unmonitored += 1
+
+              else
+                send_critical(check_name, source, "#{msg} is not healthy")
+                unhealthy += 1
+            end
           end
         end
       end

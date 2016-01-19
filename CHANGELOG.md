@@ -5,6 +5,10 @@ This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachang
 
 ## Unreleased
 
+## [0.0.14] - 2016-01-19
+### Added
+- Added support for containers having the io.rancher.container.start_once set to true
+
 ## [0.0.13] - 2016-01-17
 ### Added
 - Fixed service check
