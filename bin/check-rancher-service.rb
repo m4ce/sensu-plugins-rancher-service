@@ -144,7 +144,7 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
           container = get_container(container_name)
 
           if container['labels'].has_key?('io.rancher.container.start_once') and container['labels']['io.rancher.container.start_once']
-            send_ok(check_name, source, "#{msg} not monitored (start-once)"
+            send_ok(check_name, source, "#{msg} not monitored (start-once)")
           else
             skip = false
             if state.has_key?(container_name)
