@@ -33,5 +33,6 @@ Gem::Specification.new do |s|
   s.test_files             = s.files.grep(%r{^(test|spec|features)/})
   s.version                = SensuPluginsRancherService::Version::VER_STRING
 
-  s.add_runtime_dependency 'sensu-plugin',   '1.2.0'
+  s.add_runtime_dependency 'sensu-plugin','1.2.0'
+  s.add_runtime_dependency 'rancher-metadata', '0.17.14'
 end
