@@ -9,7 +9,7 @@ require 'sensu-plugin/check/cli'
 require 'net/http'
 require 'json'
 require 'fileutils'
-require 'rancher-metadata'
+require 'rancher-metadata/api'
 
 class CheckRancherService < Sensu::Plugin::Check::CLI
   option :api_url,
