@@ -13,10 +13,10 @@ require 'rancher-metadata'
 
 class CheckRancherService < Sensu::Plugin::Check::CLI
   option :api_url,
-         :description => "Rancher Metadata API URL (default: http://rancher-metadata/2015-07-25)",
+         :description => "Rancher Metadata API URL (default: http://rancher-metadata/2015-12-19)",
          :long => "--api-url <URL>",
          :proc => proc { |s| s.gsub(/\/$/, '') },
-         :default => "http://rancher-metadata/2015-07-25"
+         :default => "http://rancher-metadata/2015-12-19"
 
   option :state_dir,
          :description => "State directory",
@@ -41,7 +41,7 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
     # prepare state directory
     FileUtils.mkdir_p(config[:state_dir]) unless File.directory?(config[:state_dir])
 
-    @metadata_api = RancherMetadata::API.new({:api_url => "http://rancher-metadata/2015-12-19"})
+    @metadata_api = RancherMetadata::API.new({:api_url => config[:api_url]})
     @state_file = config[:state_dir] + "/containers.json"
   end
 
