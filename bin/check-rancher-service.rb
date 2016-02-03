@@ -9,6 +9,7 @@ require 'sensu-plugin/check/cli'
 require 'net/http'
 require 'json'
 require 'fileutils'
+require 'rancher-metadata/api'
 
 class CheckRancherService < Sensu::Plugin::Check::CLI
   option :api_url,
@@ -40,6 +41,7 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
     # prepare state directory
     FileUtils.mkdir_p(config[:state_dir]) unless File.directory?(config[:state_dir])
 
+    @metadata_api = RancherMetadata::API.new({:api_url => "http://rancher-metadata/2015-12-19"})
     @state_file = config[:state_dir] + "/containers.json"
   end
 
@@ -84,39 +86,6 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
     send_client_socket(event.to_json)
   end
 
-  def is_error?(data)
-    if data.is_a?(Hash) and data.has_key?('code') and data['code'] == 404
-      return true
-    else
-      return false
-    end
-  end
-
-  def api_get(query)
-    begin
-      uri = URI.parse("#{config[:api_url]}#{query}")
-      req = Net::HTTP::Get.new(uri.path, {'Content-Type' => 'application/json', 'Accept' => 'application/json'})
-      resp = Net::HTTP.new(uri.host, uri.port).request(req)
-      data = JSON.parse(resp.body)
-
-      if is_error?(data)
-        return nil
-      else
-        return data
-      end
-    rescue
-      raise "Failed to query Rancher Metadata API - Caught exception (#{$!})"
-    end
-  end
-
-  def get_services()
-    api_get("/services")
-  end
-
-  def get_container(name)
-    api_get("/containers/#{name}")
-  end
-
   def run
     unmonitored = 0
     unhealthy = 0
@@ -124,7 +93,7 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
     # read current state
     state = read_state()
 
-    get_services().each do |service|
+    self.metadata_api.get_services.each do |service|
       source = "#{service['stack_name']}_#{service['name']}.rancher.internal"
 
       if service['metadata'].has_key?('sensu') and service['metadata']['sensu'].has_key?('monitored')
@@ -134,30 +103,28 @@ class CheckRancherService < Sensu::Plugin::Check::CLI
       end
 
       # get containers
-      service['containers'].each do |container_name|
-        check_name = "rancher-container-#{container_name}-state"
-        msg = "Instance #{container_name}"
+      service['containers'].each do |container|
+        check_name = "rancher-container-#{container['name']}-state"
+        msg = "Instance #{container['name']}"
 
         unless monitored
           send_ok(check_name, source, "#{msg} not monitored (disabled)")
         else
-          container = get_container(container_name)
-
           if container['labels'].has_key?('io.rancher.container.start_once') and container['labels']['io.rancher.container.start_once']
             send_ok(check_name, source, "#{msg} not monitored (start-once)")
           else
             skip = false
-            if state.has_key?(container_name)
-              if container['start_count'] > state[container_name]['start_count']
+            if state.has_key?(container['name'])
+              if container['start_count'] > state[container['name']]['start_count']
                 send_warning(check_name, source, "#{msg} has restarted")
                 skip = true
               end
             else
-              state[container_name] = {}
+              state[container['name']] = {}
             end
 
             # update state
-            state[container_name]['start_count'] = container['start_count']
+            state[container['name']]['start_count'] = container['start_count']
 
             next if skip
 
